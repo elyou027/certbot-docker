@@ -1,7 +1,7 @@
 Based on https://hub.docker.com/r/certbot/dns-cloudflare
  
 # How to build the image
-```shell script
+```
 IMAGE_TAG=v1.2.0  # get it from https://github.com/certbot-docker/certbot-docker/releases
 CF_API_EMAIL=my@example.com    # CF login
 CF_API_KEY=key                 # CF API key (general)
@@ -17,7 +17,7 @@ docker push registry.taghub.net:5000/update-certs:${IMAGE_TAG}
 
 # How to use request a new cert
 
-```shell script
+```
 docker run --rm \
   -v /var/lib/docker/data/letsencrypt:/etc/letsencrypt \
   registry.taghub.net:5000/update-certs:${IMAGE_TAG} \
@@ -30,7 +30,7 @@ docker run --rm \
 ```
 
 # How to renew a cert
-```shell script
+```
 docker run --rm -ti \
   -v /var/lib/docker/data/letsencrypt:/etc/letsencrypt \
   registry.taghub.net:5000/update-certs:${IMAGE_TAG} renew
