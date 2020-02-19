@@ -5,6 +5,9 @@ if [ "$1" = "certbot" ]
 then
   shift
   certbot "$@"
+elif [ "$1" = 'sh' ]
+then
+  exec "$@"
 else
-	exec "$@"
+  /usr/local/bin/entrypoint.py "$@"
 fi

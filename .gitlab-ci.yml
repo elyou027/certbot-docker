@@ -1,0 +1,44 @@
+image: docker:stable-git
+services:
+  - docker:dind
+
+stages:
+  - build
+
+variables:
+  IMAGE_TAG: $CI_COMMIT_SHA
+
+build:
+  stage: build
+  variables:
+    CERTBOT_CF_API_EMAIL: $CERTBOT_CF_API_EMAIL
+    CERTBOT_CF_API_KEY: $CERTBOT_CF_API_KEY
+    CERTBOT_CF_API_TOKEN: $CERTBOT_CF_API_TOKEN
+    CERTBOT_NOTIFY_EMAIL: $CERTBOT_NOTIFY_EMAIL
+    DOCKER_HOST: $DOCKER_HOST
+    DOCKER_SWARM_SERVICE: $DOCKER_SWARM_SERVICE
+    CERTBOT_BASE_IMAGE: $CERTBOT_BASE_IMAGE
+    CERTBOT_RESULT_IMAGE: $CERTBOT_RESULT_IMAGE
+    DNS_CLOUDFLARE_IMAGE_TAG: $DNS_CLOUDFLARE_IMAGE_TAG
+  script:
+    - docker pull $CERTBOT_BASE_IMAGE:latest
+    - docker tag $CERTBOT_BASE_IMAGE:latest $CERTBOT_BASE_IMAGE:last
+    - docker build
+      --rm
+      --build-arg version=$DNS_CLOUDFLARE_IMAGE_TAG
+      --build-arg CERTBOT_DOMAINS=$CERTBOT_DOMAINS
+      --build-arg CERTBOT_CF_API_TOKEN=$CERTBOT_CF_API_TOKEN
+      --build-arg CERTBOT_NOTIFY_EMAIL=$CERTBOT_NOTIFY_EMAIL
+      --build-arg DOCKER_HOST=$DOCKER_HOST
+      --build-arg DOCKER_SWARM_SERVICE=$DOCKER_SWARM_SERVICE
+      --build-arg CERTBOT_BASE_IMAGE=$CERTBOT_BASE_IMAGE
+      --build-arg CERTBOT_RESULT_IMAGE=$CERTBOT_RESULT_IMAGE
+      -t $CERTBOT_BASE_IMAGE:$IMAGE_TAG .
+    - docker push $CERTBOT_BASE_IMAGE:$IMAGE_TAG
+    - docker tag $CERTBOT_BASE_IMAGE:$IMAGE_TAG $CERTBOT_BASE_IMAGE:latest
+    - docker push $CERTBOT_BASE_IMAGE:latest
+  environment:
+    name: master
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+      when: always
