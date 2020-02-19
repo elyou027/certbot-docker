@@ -49,6 +49,7 @@ See examples bellow
 * `CERTBOT_RESULT_IMAGE` image that used to get and maintain certificates
  
 # How to build the image
+
 ## Manually
 ```
 DNS_CLOUDFLARE_IMAGE_TAG=v1.2.0         # get it from https://github.com/certbot-docker/certbot-docker/releases
@@ -59,9 +60,9 @@ docker build \
       --build-arg version=$DNS_CLOUDFLARE_IMAGE_TAG \
       --build-arg CERTBOT_DOMAINS='[["test2.taghub.com","*.test2.taghub.com"]]'\
       --build-arg CERTBOT_CF_API_TOKEN=my_cf_token \
-      --build-arg CERTBOT_NOTIFY_EMAIL=devops@skynix.co \
+      --build-arg CERTBOT_NOTIFY_EMAIL=devops@taghub.net \
       --build-arg DOCKER_HOST=tcp://10.244.201.170:4243 \
-      --build-arg DOCKER_SWARM_SERVICE=gateway_aws-traefik \
+      --build-arg DOCKER_SWARM_SERVICES=gateway_aws-traefik,gateway_gcp-traefik, \
       --build-arg CERTBOT_BASE_IMAGE=registry.taghub.net:5000/certbot-cf-base:latest \
       --build-arg CERTBOT_RESULT_IMAGE=registry.taghub.net:5000/certbot-cf \
       -t registry.taghub.net:5000/certbot-cf-base .
@@ -69,6 +70,7 @@ docker build \
 # push the image to the registry
 docker push registry.taghub.net:5000/certbot-cf-base
 ```
+
 ## CI
 Simply run Gitlab pipeline
 
@@ -78,7 +80,7 @@ Simply run Gitlab pipeline
 ```
 docker run --rm \
     -e CERTBOT_DOMAINS=$CERTBOT_DOMAINS \
-    hub.skynix.co/certbot-dns-cloudflare --help
+    hub.taghub.net/certbot-dns-cloudflare --help
 ```
 
 ## Some useful keys
@@ -86,18 +88,58 @@ docker run --rm \
 * `--loglevel debug` default loglevel is "INFO"
 * `--staging` for testing only. LetsEncrypt has a limitation of the number of certs and calls. 
 Using staging you can get unlimited count of fake certs. Useful for testing
-* `--domains '[["test2.skynix.co","*.test2.skynix.co"]]'` optional domains arg.  If it is set that it has higher 
+* `--domains '[["test2.taghub.net","*.test2.taghub.net"]]'` optional domains arg.  If it is set that it has higher 
 precedence against `CERTBOT_DOMAINS` variable
 
-## How to use request a new cert
+## How to request a new cert
 
+1. Manually edit swarm service by adding secrets first time. 
+1.1. You can request certs and create secrets without editing the services if run image with 
+`-e DOCKER_SWARM_SERVICES:none`:
 ```
+export CERTBOT_BASE_IMAGE=registry.taghub.net:5000/certbot-cf-base:latest
 docker run --rm \
-    hub.skynix.co/certbot-dns-cloudflare \
+    -e DOCKER_SWARM_SERVICES:none \
+    $CERTBOT_BASE_IMAGE \
     --loglevel debug \
     --deploy-to-swarm \
-    --domains '[["test2.skynix.co","*.test2.skynix.co"]]' \
-    --staging \
+    --domains '[["test2.taghub.net","*.test2.taghub.net"]]' \
+    create_new
+```
+This command creates new image (with state of `/etc/letsencrypt`) that can be used in future instead of 
+`$CERTBOT_BASE_IMAGE`
+1.2. Next, you need `DOCKER_SECRET_TAG` for the created secrets. These can get from the output of previous command or
+from `docker service ls`. For example:
+```
+docker secret ls
+ID                          NAME                                       DRIVER              CREATED             UPDATED
+8l0bwejkd7ccc5vgrmv5n1ojl   acme-cert-test2.taghub.net-20200218150900                       20 hours ago        20 hours ago
+
+```
+`20200218150900` is `DOCKER_SECRET_TAG`
+2. Manually update docker stack yml file with new secrets and apply changes
+
+3.1. Optional, if you want to check all flow you can rerun docker image without `-e DOCKER_SWARM_SERVICES:none` and with
+`CERTBOT_BASE_IMAGE` that hasn't got `/ect/letsecnrypt`. This is important because if you rerun with 
+`CERTBOT_RESULT_IMAGE` then certificates will not update (too early yet) and deploy hook will not be called. So any 
+changes to services will not be made
+```
+export CERTBOT_BASE_IMAGE=registry.taghub.net:5000/certbot-cf-base:latest
+docker run --rm \
+    ${CERTBOT_BASE_IMAGE} \
+    --loglevel debug \
+    --deploy-to-swarm \
+    --domains '[["test2.taghub.net","*.test2.taghub.net"]]' \
+    create_new
+```
+4. In future use `CERTBOT_RESULT_IMAGE` to maintain current certificate sets
+```
+export CERTBOT_RESULT_IMAGE=registry.taghub.net:5000/certbot-cf
+docker run --rm \
+    ${CERTBOT_RESULT_IMAGE} \
+    --loglevel debug \
+    --deploy-to-swarm \
+    --domains '[["test2.taghub.net","*.test2.taghub.net"]]' \
     create_new
 ```
 
@@ -112,10 +154,10 @@ run image with `-e DOCKER_SWARM_SERVICES:none`:
 ```
 docker run --rm \
     -e DOCKER_SWARM_SERVICES:none \
-    hub.skynix.co/certbot-dns-cloudflare \
+    hub.taghub.net/certbot-dns-cloudflare \
     --loglevel debug \
     --deploy-to-swarm \
-    --domains '[["test2.skynix.co","*.test2.skynix.co"]]' \
+    --domains '[["test2.taghub.net","*.test2.taghub.net"]]' \
     create_new
 ```
 2. Simple rerun flow:

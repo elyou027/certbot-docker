@@ -68,3 +68,41 @@ services:
           - node.labels.cloud == gcp
     networks:
       - taghub-example
+
+  aws-traefik-example:
+    #image: hub.skynix.co/taghub/traefik:2-gcp
+    image: hub.skynix.co/taghub/traefik:1.7.4-gcp
+    secrets:
+      - source: acme-cert-test2.skynix.co
+        target: /certs/taghub.net.cert
+        mode: 0600
+      - source: acme-key-test2.skynix.co
+        target: /certs/taghub.net.key
+        mode: 0600
+      - source: acme-cert-test3.skynix.co
+        target: /certs/taghub.io.cert
+        mode: 0600
+      - source: acme-key-test3.skynix.co
+        target: /certs/taghub.io.key
+        mode: 0600
+          - source: acme-cert-test4.skynix.co
+            target: /certs/smartm.no.cert
+            mode: 0600
+          - source: acme-key-test4.skynix.co
+            target: /certs/smartm.no.key
+            mode: 0600
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    deploy:
+      mode: global
+      update_config:
+        delay: 10s
+      placement:
+        constraints:
+          - node.labels.type == gateway
+          - node.labels.cloud == aws
+    networks:
+      - taghub-example

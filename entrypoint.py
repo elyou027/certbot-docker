@@ -72,32 +72,36 @@ def update_services():
     if os.path.isfile("/tmp/SERVICE_UPDATE_REQUIRED"):
         get_logger().debug("/tmp/SERVICE_UPDATE_REQUIRED exists")
         client = docker.from_env()
-        service = client.services.list(filters={"name": get_env("DOCKER_SWARM_SERVICES")})
-        for s in service:
-            new_secrets = []
-            for current_secret in s.attrs['Spec']['TaskTemplate']['ContainerSpec']['Secrets']:
-                str_new_secret_name = '-'.join(current_secret['SecretName'].split('-')[:-1]) + f'-{get_env("DOCKER_SECRET_TAG")}'
+        # TODO Play with filters instead of loop of the var DOCKER_SWARM_SERVICES
+        for service_name in get_env("DOCKER_SWARM_SERVICES", '').split(','):
+            service = client.services.list(filters={"name": service_name})
+            for s in service:
+                new_secrets = []
+                for current_secret in s.attrs['Spec']['TaskTemplate']['ContainerSpec']['Secrets']:
+                    str_new_secret_name = '-'.join(
+                        current_secret['SecretName'].split('-')[:-1]) + f'-{get_env("DOCKER_SECRET_TAG")}'
 
-                try:
-                    new_secret_obj = client.secrets.list(filters={"name": str_new_secret_name})[0]
-                except IndexError:
-                    get_logger().error("Count of certs that have been got from LetsEncrypt is less than the count of "
-                                       "secrets that connected to the services!")
-                    sys.exit()
-                new_secret = SecretReference(
-                    secret_id=new_secret_obj.id,
-                    secret_name=str_new_secret_name,
-                    filename=current_secret['File']['Name'],
-                    mode=current_secret['File']['Mode']
-                )
-                get_logger().debug(f'Updating service: {s.name} with new secret name: {str_new_secret_name}, '
-                                   f'filename: {current_secret["File"]["Name"]}, '
-                                   f'secret_id: new_secret_obj.id')
-                new_secrets.append(new_secret)
+                    try:
+                        new_secret_obj = client.secrets.list(filters={"name": str_new_secret_name})[0]
+                    except IndexError:
+                        get_logger().error(
+                            "Count of certs that have been got from LetsEncrypt is less than the count of "
+                            "secrets that connected to the services!")
+                        sys.exit()
+                    new_secret = SecretReference(
+                        secret_id=new_secret_obj.id,
+                        secret_name=str_new_secret_name,
+                        filename=current_secret['File']['Name'],
+                        mode=current_secret['File']['Mode']
+                    )
+                    get_logger().debug(f'Updating service: {s.name} with new secret name: {str_new_secret_name}, '
+                                       f'filename: {current_secret["File"]["Name"]}, '
+                                       f'secret_id: new_secret_obj.id')
+                    new_secrets.append(new_secret)
 
-            s.update(secrets=new_secrets)
-            get_logger().info(f"Service {s.name} has been successfully updated with new secrets. New tag is:"
-                              f" {get_env('DOCKER_SECRET_TAG')}")
+                s.update(secrets=new_secrets)
+                get_logger().info(f"Service {s.name} has been successfully updated with new secrets. New tag is:"
+                                  f" {get_env('DOCKER_SECRET_TAG')}")
 
 
 def create_image():
