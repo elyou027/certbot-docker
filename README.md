@@ -125,7 +125,11 @@ precedence against `CERTBOT_DOMAINS` variable
 
 2. Manually update docker stack yml file with new secrets and apply changes
 
-3.1. Optional, if you want to check all flow you can rerun docker image without `-e DOCKER_SWARM_SERVICES:none` and with `CERTBOT_BASE_IMAGE` that hasn't got `/ect/letsecnrypt`. This is important because if you rerun with `CERTBOT_RESULT_IMAGE` then certificates will not update (too early yet) and deploy hook will not be called. So any changes to services will not be made
+3. Optional, if you want to check all flow you can rerun docker image without `-e DOCKER_SWARM_SERVICES:none` and with
+`CERTBOT_BASE_IMAGE` that hasn't got `/ect/letsecnrypt`. This is important because if you rerun with 
+`CERTBOT_RESULT_IMAGE` then certificates will not update (too early yet) and deploy hook will not be called. So any 
+changes to services will not be made
+
     ```
     export CERTBOT_BASE_IMAGE=registry.taghub.net:5000/certbot-cf-base:latest
     docker run --rm \
@@ -138,15 +142,15 @@ precedence against `CERTBOT_DOMAINS` variable
 
 4. In future use `CERTBOT_RESULT_IMAGE` to maintain current certificate sets
 
-```
-export CERTBOT_RESULT_IMAGE=registry.taghub.net:5000/certbot-cf
-docker run --rm \
-    ${CERTBOT_RESULT_IMAGE} \
-    --loglevel debug \
-    --deploy-to-swarm \
-    --domains '[["test2.taghub.net","*.test2.taghub.net"]]' \
-    create_new
-```
+    ```
+    export CERTBOT_RESULT_IMAGE=registry.taghub.net:5000/certbot-cf
+    docker run --rm \
+        ${CERTBOT_RESULT_IMAGE} \
+        --loglevel debug \
+        --deploy-to-swarm \
+        --domains '[["test2.taghub.net","*.test2.taghub.net"]]' \
+        create_new
+    ```
 
 ## How to renew a cert
 
