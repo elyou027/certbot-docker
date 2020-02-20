@@ -77,7 +77,7 @@ def update_services():
             service = client.services.list(filters={"name": service_name})
             for s in service:
                 new_secrets = []
-                for current_secret in s.attrs['Spec']['TaskTemplate']['ContainerSpec']['Secrets']:
+                for current_secret in s.attrs['Spec']['TaskTemplate']['ContainerSpec'].get('Secrets', []):
                     str_new_secret_name = '-'.join(
                         current_secret['SecretName'].split('-')[:-1]) + f'-{get_env("DOCKER_SECRET_TAG")}'
 

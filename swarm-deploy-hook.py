@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-import sys
+import re
 import os
 import docker
 import logging
 import argparse
-from datetime import datetime
 import time
 
 client = docker.from_env()
@@ -50,8 +49,11 @@ def secret_create():
     with open(os.path.join(renewed_lineage, "privkey.pem"), 'r') as file:
         key_file = file.read()
 
-    secret_cert_name = f'acme-cert-{domains[0]}-{docker_secret_tag}'
-    secret_key_name = f'acme-key-{domains[0]}-{docker_secret_tag}'
+    # remove * from secret name
+    domain_name = re.sub(r'^\*\.|\*|^\.', '', domains[0])
+
+    secret_cert_name = f'acme-cert-{domain_name}-{docker_secret_tag}'
+    secret_key_name = f'acme-key-{domain_name}-{docker_secret_tag}'
 
     secret_cert = client.secrets.create(
         name=secret_cert_name,
