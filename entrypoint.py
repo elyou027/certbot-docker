@@ -57,7 +57,7 @@ def create_cf_creds():
             if get_env('CERTBOT_CF_API_TOKEN') == 'none':
                 get_logger().debug("Creating /cloudflare.ini with dns_cloudflare_email and dns_cloudflare_api_key")
                 writer.writelines([
-                    f'dns_cloudflare_email = {get_env("CERTBOT_CF_API_TOKEN")}',
+                    f'dns_cloudflare_email = {get_env("CERTBOT_CF_API_EMAIL")}',
                     f'dns_cloudflare_api_key = {get_env("CERTBOT_CF_API_KEY")}'
                 ])
             else:
