@@ -40,7 +40,7 @@ Some notes about them:
 `CERTBOT_CF_API_TOKEN`. They are left for backward compatibility
 * `CERTBOT_NOTIFY_EMAIL` - set here you a real email that will be used for creating an account on the Let's Encrypt and 
 sending emails with alerts about certifications expiration
-* `DOCKER_SWARM_SERVICE` - example `gateway_aws-traefik,gateway_gcp-traefik`. Default value is `none`, that means do not
+* `DOCKER_SWARM_SERVICES` - example `gateway_aws-traefik,gateway_gcp-traefik`. Default value is `none`, that means do not
  update any services. Useful to set to `none` for first run to get certs and secrets but without touching any services
 * `CERTBOT_DOMAINS` - as certificates can be grouped together to one file, we have to use two-dimensional array. For 
 example: `'[["test2.taghub.com","*.test2.taghub.com"]]'`. This variable can be overrided by `--domains` key. 
