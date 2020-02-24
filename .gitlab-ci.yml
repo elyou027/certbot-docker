@@ -8,7 +8,6 @@ stages:
 variables:
   IMAGE_TAG: $CI_COMMIT_SHA
   CERTBOT_VERSION: "v1.2.0"
-  CERTBOT_DOMAINS: '[["taghub.io","*.taghub.io"],["*.smart.no"]]'
 
 build:
   stage: build
