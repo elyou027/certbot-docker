@@ -1,2 +1,4 @@
 docker
 argparse
+gitpython
+pyyaml ~=5.1
