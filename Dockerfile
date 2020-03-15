@@ -8,8 +8,8 @@ ARG CERTBOT_DOMAINS=[]
 ARG CERTBOT_NOTIFY_EMAIL=super.admin@gmail.com
 ARG DOCKER_HOST=tcp://your_docker_host:2376
 ARG DOCKER_SWARM_SERVICES=none
-ARG CERTBOT_BASE_IMAGE=registry.taghub.net:5000/certbot-cf-base:latest
-ARG CERTBOT_RESULT_IMAGE=registry.taghub.net:5000/certbot-cf
+ARG CERTBOT_BASE_IMAGE=registry.example.net:5000/certbot-cf-base:latest
+ARG CERTBOT_RESULT_IMAGE=registry.example.net:5000/certbot-cf
 ARG CERTBOT_CHALLENGE=/usr/local/bin/swarm-deploy-hook.py
 
 ENV CERTBOT_CF_API_EMAIL    ${CERTBOT_CF_API_EMAIL}
@@ -25,6 +25,10 @@ ENV DOCKER_SWARM_SERVICES   ${DOCKER_SWARM_SERVICES}
 ENV DOCKER_SECRET_TAG       none
 ENV LOGLEVEL                INFO
 ENV CERTBOT_CHALLENGE       ${CERTBOT_CHALLENGE}
+
+ENV KUBERNETES_NAMESPACE            none
+ENV KUBERNETES_EXEC_COMMAND         nginx -s reload
+ENV KUBERNETES_LABEL_SELECTOR      k8s-app=nginx-ingress-lb
 
 WORKDIR $CERTBOT_DATA_DIR_PATH
 

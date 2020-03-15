@@ -3,3 +3,4 @@ docker-shell
 traefik-gw
 venv
 letsencrypt*
+.kube

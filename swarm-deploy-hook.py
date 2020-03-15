@@ -19,7 +19,7 @@ def get_env(env_name, default_val=None):
 
 def get_logger():
     global __logger
-    if not LOG:
+    if not __logger:
         loglevel = get_env("LOGLEVEL", "INFO")
         log_format = '[%(asctime)s]:  %(levelname)-8s:  %(message)s'
         time_format = '%H:%M:%S'
@@ -33,8 +33,8 @@ def get_logger():
         log = logging.getLogger("certbot-deploy-hook")
         log.setLevel(level=numeric_level)
         log.addHandler(ch)
-        LOG = log
-    return LOG
+        __logger = log
+    return __logger
 
 
 def secret_create():

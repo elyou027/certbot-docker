@@ -2,3 +2,4 @@ docker
 argparse
 gitpython
 pyyaml ~=5.1
+kubernetes
