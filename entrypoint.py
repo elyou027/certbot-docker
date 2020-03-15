@@ -5,12 +5,15 @@ import argparse
 import logging
 import os
 import sys
+import shutil
+import yaml
+import docker
 import subprocess
 from datetime import datetime
 from pathlib import Path
-import docker
+from git import Repo
+from git import Actor
 from docker.types import SecretReference
-import io
 
 
 def get_env(env_name, default_val=None):
@@ -19,6 +22,7 @@ def get_env(env_name, default_val=None):
 
 LETSENCRYPT_PATH = os.path.join(get_env("CERTBOT_DATA_DIR_PATH", "/etc"), "letsencrypt")
 LOG = None
+GIT_WORKING_DIR = get_env("GIT_WORKING_DIR", os.path.expanduser("~/git_test"))
 
 
 def get_logger():

@@ -10,7 +10,7 @@ client = docker.from_env()
 renewed_domains = os.environ.get("RENEWED_DOMAINS", None)
 renewed_lineage = os.environ.get("RENEWED_LINEAGE")
 docker_swarm_service = os.environ.get("DOCKER_SWARM_SERVICE")
-LOG = None
+__logger = None
 
 
 def get_env(env_name, default_val=None):
@@ -18,7 +18,7 @@ def get_env(env_name, default_val=None):
 
 
 def get_logger():
-    global LOG
+    global __logger
     if not LOG:
         loglevel = get_env("LOGLEVEL", "INFO")
         log_format = '[%(asctime)s]:  %(levelname)-8s:  %(message)s'
